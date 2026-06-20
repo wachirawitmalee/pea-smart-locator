@@ -1,0 +1,81 @@
+// ==========================================
+// ⚙️ PRISMA CLIENT GENERATOR
+// ==========================================
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 🗄️ DATABASE CONNECTION
+// ==========================================
+datasource db {
+  // หากคุณใช้ฐานข้อมูลอื่น เช่น MySQL หรือ PostgreSQL สามารถเปลี่ยน provider ตรงนี้ได้ครับ
+  // แต่จากโครงสร้างที่คุณใช้ ผมตั้งเป็น sqlite ไว้ตามค่าเริ่มต้นของระบบ Local
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// 🏢 1. STORAGE LOCATION (สถานที่หลัก: อาคาร / ลานสนาม)
+// ==========================================
+model StorageLocation {
+  id        String        @id @default(cuid())
+  name      String        @unique // ชื่อคลังต้องไม่ซ้ำกัน เช่น "คลังโปร่ง 1"
+  type      String        // ประเภท: "INDOOR" (ในร่ม) หรือ "OUTDOOR" (กลางแจ้ง)
+  
+  zones     StorageZone[] // 1 สถานที่ มีได้หลายโซน/แร็ค
+  
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+// ==========================================
+// 🗄️ 2. STORAGE ZONE (โซนรอง: ชุดแร็ค / ระดับชั้น)
+// ==========================================
+model StorageZone {
+  id         String          @id @default(cuid())
+  name       String          // ชื่อแร็คและชั้น เช่น "แร็ค A - ชั้น 0"
+  
+  locationId String
+  location   StorageLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  
+  bins       StorageBin[]    // 1 โซน/ชั้น มีช่องเก็บของได้หลายบล็อก
+  
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+// ==========================================
+// 📦 3. STORAGE BIN (ช่องพิกัดย่อย: บล็อกเก็บพัสดุ)
+// ==========================================
+model StorageBin {
+  id         String        @id @default(cuid())
+  code       String        @unique // รหัสพิกัดสุดท้ายต้องไม่ซ้ำ เช่น "คลัง1-แร็คA-F0-B01"
+  status     String        // สถานะ: "EMPTY", "OCCUPIED", "BLOCKED"
+  
+  zoneId     String
+  zone       StorageZone   @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  
+  // ✅ ความสัมพันธ์แบบ Many-to-Many: 1 ช่องพิกัด สามารถมีพัสดุวางปนกันได้หลายชนิด
+  materials  Material[]    
+}
+
+// ==========================================
+// 🛠️ 4. MATERIAL (ข้อมูลพัสดุ)
+// ==========================================
+model Material {
+  id           String        @id @default(cuid())
+  materialCode String        @unique // รหัสพัสดุต้องไม่ซ้ำกัน เช่น "1325633"
+  description  String        // คำอธิบายภาษาอังกฤษ (ชื่อหลัก)
+  thaiName     String?       // ชื่อภาษาไทย
+  specificTerm String?       // ศัพท์เฉพาะ / ชื่อเรียกหน้างาน
+  placeOfWork  String?       // สถานที่ปฏิบัติงาน (หน่วยงานเจ้าของ)
+  remark       String?       // หมายเหตุเพิ่มเติม
+  imageUrl     String?       // ลิงก์เก็บรูปภาพ
+  
+  // ✅ ความสัมพันธ์แบบ Many-to-Many: 1 พัสดุ สามารถถูกนำไปวางกระจายอยู่ได้หลายพิกัด
+  bins         StorageBin[]  
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}

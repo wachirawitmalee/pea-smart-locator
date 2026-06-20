@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: pea_ranod_mysql_v2
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pea_ranod_locator
+      MYSQL_USER: pea_dev
+      MYSQL_PASSWORD: peapassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_v2:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql_data_v2:
