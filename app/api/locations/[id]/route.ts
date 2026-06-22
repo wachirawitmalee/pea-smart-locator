@@ -109,7 +109,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     } 
     // 🏕️ 3. กรณีแก้ไขโครงสร้างลานสนาม (OUTDOOR)
     else if (type === "OUTDOOR" && grid) {
-      const desiredBinCodes = [];
+      // 💡 แก้ไขจุดเจ้าปัญหาตรงนี้ เติม : string[] เพื่อบอกว่าเป็นอาเรย์เก็บข้อความ
+      const desiredBinCodes: string[] = [];
+      
       for (let r = 1; r <= grid.height; r++) {
         for (let c = 1; c <= grid.width; c++) {
           if (!grid.deactivatedCells.includes(`${r}-${c}`)) {
