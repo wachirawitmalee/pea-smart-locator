@@ -15,7 +15,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     if (binIds.length > 0) {
       await prisma.material.updateMany({
         where: { bins: { some: { id: { in: binIds } } } },
-        data: { bins: { disconnect: binIds.map(bId => ({ id: bId })) } },
+        data: { bins: { disconnect: binIds.map((bId: any) => ({ id: bId })) } },
       });
       await prisma.storageBin.deleteMany({ where: { zoneId: { in: zoneIds } } });
     }
