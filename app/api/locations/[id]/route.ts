@@ -8,7 +8,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   try {
     const { id } = await params;
     const zones = await prisma.storageZone.findMany({ where: { locationId: id } });
-    const zoneIds = zones.map(z => z.id);
+    const zoneIds = zones.map((z: any) => z.id);
     const bins = await prisma.storageBin.findMany({ where: { zoneId: { in: zoneIds } } });
     const binIds = bins.map(b => b.id);
 
