@@ -1,18 +1,11 @@
-// ==========================================
-// ⚙️ PRISMA CLIENT GENERATOR
-// ==========================================
 generator client {
   provider = "prisma-client-js"
 }
 
-// ==========================================
-// 🗄️ DATABASE CONNECTION
-// ==========================================
 datasource db {
-  // หากคุณใช้ฐานข้อมูลอื่น เช่น MySQL หรือ PostgreSQL สามารถเปลี่ยน provider ตรงนี้ได้ครับ
-  // แต่จากโครงสร้างที่คุณใช้ ผมตั้งเป็น sqlite ไว้ตามค่าเริ่มต้นของระบบ Local
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ==========================================
