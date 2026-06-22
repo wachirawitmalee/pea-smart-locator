@@ -76,7 +76,7 @@ const activeBinIds = bins.map((b: any) => b.id);
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5"><MapPin size={14} /> พิกัดจัดเก็บทั้งหมด (วางอยู่ {bins.length} จุด)</span>
               {bins.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {bins.map(b => (
+                  {bins.map((b: any) => (
                     <div key={b.id} className="flex items-center gap-2 bg-white border border-[#741F80]/20 px-3 py-2 rounded-xl shadow-sm">
                       <span className="w-2 h-2 rounded-full bg-[#741F80] animate-pulse"></span>
                       <span className="text-sm font-black tracking-wider text-[#741F80]">{b.code}</span>
