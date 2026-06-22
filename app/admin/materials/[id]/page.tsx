@@ -22,7 +22,7 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
 
   // ✅ หาพิกัดทั้งหมด
   const bins = material.bins || [];
-  const activeBinIds = bins.map(b => b.id);
+const activeBinIds = bins.map((b: any) => b.id);
   
   // ใช้ Location ของอันแรกเป็นฐานวาดแผนที่ (กรณีวางข้ามคลัง จะโชว์แผนที่ของคลังแรก)
   const fullLocation = bins.length > 0 ? bins[0].zone.location : null;
