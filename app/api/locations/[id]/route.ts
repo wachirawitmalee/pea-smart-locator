@@ -13,10 +13,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const binIds = bins.map((b: any) => b.id);
 
     if (binIds.length > 0) {
-      await prisma.material.updateMany({
+      // 💡 แก้ไข: ใช้ findMany แล้วลูป update ทีละรายการแทน updateMany
+      const affectedMaterials = await prisma.material.findMany({
         where: { bins: { some: { id: { in: binIds } } } },
-        data: { bins: { disconnect: binIds.map((bId: any) => ({ id: bId })) } },
+        select: { id: true }
       });
+      for (const mat of affectedMaterials) {
+        await prisma.material.update({
+          where: { id: mat.id },
+          data: { bins: { disconnect: binIds.map((bId: any) => ({ id: bId })) } },
+        });
+      }
       await prisma.storageBin.deleteMany({ where: { zoneId: { in: zoneIds } } });
     }
 
@@ -81,11 +88,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
           const binsToRemove = eZone.bins.filter((b: any) => !dBinCodes.includes(b.code));
           if (binsToRemove.length > 0) {
             const removeIds = binsToRemove.map((b: any) => b.id);
-            // ปลดล็อกพัสดุก่อนทำลายบล็อก
-            await prisma.material.updateMany({
+            // 💡 แก้ไข: ใช้ findMany แล้ววนลูปอัปเดตทีละรายการ
+            const affectedMaterials = await prisma.material.findMany({
               where: { bins: { some: { id: { in: removeIds } } } },
-              data: { bins: { disconnect: removeIds.map((rid: any) => ({ id: rid })) } }
+              select: { id: true }
             });
+            for (const mat of affectedMaterials) {
+              await prisma.material.update({
+                where: { id: mat.id },
+                data: { bins: { disconnect: removeIds.map((rid: any) => ({ id: rid })) } }
+              });
+            }
             await prisma.storageBin.deleteMany({ where: { id: { in: removeIds } } });
           }
         }
@@ -98,10 +111,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       for (const zRem of zonesToRemove) {
         const removeBinIds = zRem.bins.map((b: any) => b.id);
         if (removeBinIds.length > 0) {
-          await prisma.material.updateMany({
+          // 💡 แก้ไข: ใช้ findMany แล้ววนลูปอัปเดตทีละรายการ
+          const affectedMaterials = await prisma.material.findMany({
             where: { bins: { some: { id: { in: removeBinIds } } } },
-            data: { bins: { disconnect: removeBinIds.map((rid: any) => ({ id: rid })) } }
+            select: { id: true }
           });
+          for (const mat of affectedMaterials) {
+            await prisma.material.update({
+              where: { id: mat.id },
+              data: { bins: { disconnect: removeBinIds.map((rid: any) => ({ id: rid })) } }
+            });
+          }
           await prisma.storageBin.deleteMany({ where: { zoneId: zRem.id } });
         }
         await prisma.storageZone.delete({ where: { id: zRem.id } });
@@ -109,7 +129,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     } 
     // 🏕️ 3. กรณีแก้ไขโครงสร้างลานสนาม (OUTDOOR)
     else if (type === "OUTDOOR" && grid) {
-      // 💡 แก้ไขจุดเจ้าปัญหาตรงนี้ เติม : string[] เพื่อบอกว่าเป็นอาเรย์เก็บข้อความ
       const desiredBinCodes: string[] = [];
       
       for (let r = 1; r <= grid.height; r++) {
@@ -133,10 +152,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
       if (binsToRemove.length > 0) {
         const removeIds = binsToRemove.map((b: any) => b.id);
-        await prisma.material.updateMany({
+        // 💡 แก้ไข: ใช้ findMany แล้ววนลูปอัปเดตทีละรายการ
+        const affectedMaterials = await prisma.material.findMany({
           where: { bins: { some: { id: { in: removeIds } } } },
-          data: { bins: { disconnect: removeIds.map((rid: any) => ({ id: rid })) } }
+          select: { id: true }
         });
+        for (const mat of affectedMaterials) {
+          await prisma.material.update({
+            where: { id: mat.id },
+            data: { bins: { disconnect: removeIds.map((rid: any) => ({ id: rid })) } }
+          });
+        }
         await prisma.storageBin.deleteMany({ where: { id: { in: removeIds } } });
       }
     }
