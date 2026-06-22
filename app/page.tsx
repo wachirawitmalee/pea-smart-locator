@@ -10,13 +10,13 @@ export default function Home() {
       <div className="absolute top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-10">
         <div className="flex items-center gap-2 text-[#741F80] font-black text-lg sm:text-xl">
           <div className="bg-[#741F80] text-white p-1.5 rounded-lg"><Zap size={20} fill="currentColor" /></div>
-          PEA Smart Locator
+          Material Navigate System
         </div>
         <Link 
           href="/admin" 
           className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full font-bold text-xs sm:text-sm hover:bg-emerald-100 transition shadow-sm border border-emerald-200"
         >
-          <ShieldCheck size={16} /> <span className="hidden sm:inline">System Secured (Admin)</span><span className="sm:hidden">Admin</span>
+          <ShieldCheck size={16} /> <span className="hidden sm:inline"> Admin </span><span className="sm:hidden">Admin</span>
         </Link>
       </div>
 
@@ -30,7 +30,7 @@ export default function Home() {
         </h1>
         
         <p className="text-slate-500 font-medium text-sm max-w-lg mx-auto">
-          ยกระดับการจัดการคลัง กฟภ.สาขาระโนด ด้วยระบบนำทางที่ออกแบบมาเพื่อความคล่องตัวสูงสุด
+          ยกระดับการจัดการคลัง PEA สาขาระโนด ด้วยระบบนำทางที่ออกแบบมาเพื่อความคล่องตัว
         </p>
         
         <div className="mt-8 w-full max-w-2xl mx-auto relative z-50">

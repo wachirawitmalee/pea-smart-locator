@@ -138,7 +138,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-lg"><ShieldAlert size={24} /></div>
             <div>
-              <h1 className="text-lg font-black tracking-widest uppercase">PEA Admin Portal</h1>
+              <h1 className="text-lg font-black tracking-widest uppercase">Admin Material Navigate System </h1>
               <p className="text-[10px] font-medium text-white/70">ระบบจัดการฐานข้อมูล กฟภ.สาขาระโนด</p>
             </div>
           </div>
