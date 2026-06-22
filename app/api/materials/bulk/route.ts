@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { materials } = body;
+    
+    // ✅ ดัก Type Error ตรงนี้: ระบุให้ชัดเจนว่า materials คือ Array ของข้อมูลอะไรก็ได้ (any[])
+    const materials: any[] = body.materials;
 
     if (!materials || !Array.isArray(materials)) {
       return NextResponse.json({ error: "โครงสร้างข้อมูลที่ส่งมาไม่ถูกต้อง (ต้องเป็น Array)" }, { status: 400 });

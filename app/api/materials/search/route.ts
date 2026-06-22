@@ -10,7 +10,8 @@ export async function GET(req: Request) {
     const query = searchParams.get("q") || "";
     const cleanQuery = query.trim();
 
-    let whereClause = {};
+    // 💡 แก้ไขจุดเสี่ยง: กำหนดให้เป็นประเภท any เพื่อรองรับการยัดออบเจกต์เงื่อนไขค้นหาในภายหลัง ได้อย่างปลอดภัย
+    let whereClause: any = {};
 
     if (cleanQuery) {
       // ลบขีดและช่องว่างออกเพื่อตรวจสอบว่าเป็นตัวเลขล้วนหรือไม่
@@ -24,8 +25,9 @@ export async function GET(req: Request) {
         const p3 = noHyphenQuery.substring(3, 6);
         const p4 = noHyphenQuery.substring(6, 10);
         
-        // ประกอบร่างกลับเข้าไปใหม่ โดยเติมขีดคั่น
-        const parts = [p1, p2, p3, p4].filter(Boolean);
+        // ประกอบร่างกลับเข้าไปใหม่ โดยเติมขีดคั่น 
+        // ปรับแก้ฟังก์ชัน filter ให้ระบุประเภทตัวแปร string ชัดเจน ป้องกันระบบตรวจจับระแวงประเภทข้อมูล
+        const parts = [p1, p2, p3, p4].filter((p: string) => p !== "");
         peaFormatQuery = parts.join("-");
       }
 

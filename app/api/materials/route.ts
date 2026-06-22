@@ -52,7 +52,8 @@ export async function POST(req: Request) {
     } 
     // 📄 กรณีฉุกเฉิน (เผื่อส่งเป็น JSON มา)
     else {
-      const body = await req.json();
+      // 💡 กำกับ Type : any ให้ body ป้องกัน TypeScript แจ้งเตือน
+      const body: any = await req.json();
       materialCode = body.materialCode || "";
       description = body.description || "";
       thaiName = body.thaiName || "";
@@ -87,18 +88,27 @@ export async function POST(req: Request) {
       binId = targetBin.id;
     }
 
+    // 💡 เตรียมข้อมูลก่อนบันทึก (แก้ไขให้รองรับโครงสร้างแบบ Many-to-Many ของ Prisma)
+    const createData: any = {
+      materialCode: materialCode.trim(),
+      description: description.trim(),
+      thaiName: thaiName ? thaiName.trim() : null,
+      specificTerm: specificTerm ? specificTerm.trim() : null,
+      placeOfWork: placeOfWork,
+      remark: remark ? remark.trim() : null,
+      imageUrl: imageUrl,
+    };
+
+    // 💡 ถ้ามีการระบุพิกัด ให้เชื่อมโยงพิกัดแบบ connect (ป้องกัน Prisma Error)
+    if (binId) {
+      createData.bins = {
+        connect: [{ id: binId }]
+      };
+    }
+
     // บันทึกลงฐานข้อมูล
     const newMaterial = await prisma.material.create({
-      data: {
-        materialCode: materialCode.trim(),
-        description: description.trim(),
-        thaiName: thaiName ? thaiName.trim() : null,
-        specificTerm: specificTerm ? specificTerm.trim() : null,
-        placeOfWork: placeOfWork,
-        remark: remark ? remark.trim() : null,
-        imageUrl: imageUrl,
-        binId: binId,
-      },
+      data: createData,
     });
 
     return NextResponse.json({ success: true, material: newMaterial });

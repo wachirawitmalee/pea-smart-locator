@@ -31,8 +31,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       updateData.placeOfWork = formData.get("placeOfWork")?.toString() || "";
       updateData.remark = formData.get("remark")?.toString() || "";
       
-      // ✅ ดึงพิกัดทั้งหมดที่ส่งมาเป็น Array
-      locationCodes = formData.getAll("locationCodes").map(s => s.toString()).filter(Boolean);
+      // ✅ ดึงพิกัดทั้งหมดที่ส่งมาเป็น Array (แก้ไขระบุ Type ตรงนี้เผื่อไว้ด้วยครับ)
+      locationCodes = formData.getAll("locationCodes").map((s: any) => s.toString()).filter(Boolean);
 
       const imageFile = formData.get("image") as File | null;
       if (imageFile && imageFile.size > 0) {
@@ -64,7 +64,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       where: { id },
       data: {
         ...updateData,
-        bins: { set: targetBins.map(b => ({ id: b.id })) } // รีเซ็ตและผูกพิกัดใหม่ทั้งหมด
+        // ✅ แก้ไข Type Error ตรงนี้เรียบร้อยแล้วครับ
+        bins: { set: targetBins.map((b: any) => ({ id: b.id })) } 
       }
     });
 
