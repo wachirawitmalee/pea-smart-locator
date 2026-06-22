@@ -76,7 +76,8 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1.5"><MapPin size={14} /> พิกัดจัดเก็บทั้งหมด (วางอยู่ {bins.length} จุด)</span>
               {bins.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {bins.map(b => (
+                  {/* ✅ แก้ไข Type Error ตรงนี้เรียบร้อย */}
+                  {bins.map((b: any) => (
                     <div key={b.id} className="flex items-center gap-2 bg-white border border-[#741F80]/20 px-3 py-2 rounded-xl shadow-sm">
                       <span className="w-2 h-2 rounded-full bg-[#741F80] animate-pulse"></span>
                       <span className="text-sm font-black tracking-wider text-[#741F80]">{b.code}</span>
@@ -97,7 +98,8 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
 
             {isIndoor && (
               <div className="flex flex-wrap gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200/60 overflow-x-auto">
-                {Object.keys(racksMap).map((rackName) => {
+                {/* ✅ แก้ไข Type Error ตรง Object.keys */}
+                {Object.keys(racksMap).map((rackName: any) => {
                   const rackZones = racksMap[rackName];
                   // ✅ เช็คว่ามีหมุดในแร็คนี้ไหม
                   const hasActiveBinInRack = rackZones.some((z: any) => z.bins.some((b: any) => activeBinIds.includes(b.id)));
@@ -130,9 +132,11 @@ export default async function MaterialDetailPage({ params }: { params: Promise<{
             {!isIndoor && (
               <div className="bg-emerald-50/30 p-6 rounded-2xl border border-emerald-100/50 overflow-x-auto flex justify-center">
                 <div className="grid gap-1.5 sm:gap-2" style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}>
-                  {Array.from({ length: gridRows }).map((_, rIdx) => Array.from({ length: gridCols }).map((_, cIdx) => {
+                  {/* ✅ แก้ไข Type Error ตัวแปร Array.from */}
+                  {Array.from({ length: gridRows }).map((_: any, rIdx: any) => Array.from({ length: gridCols }).map((_: any, cIdx: any) => {
                     const r = rIdx + 1; const c = cIdx + 1;
-                    const targetBin = parsedOutdoorBins.find(b => b.r === r && b.c === c);
+                    // ✅ แก้ไข Type Error ในฟังก์ชัน find
+                    const targetBin = parsedOutdoorBins.find((b: any) => b.r === r && b.c === c);
                     // ✅ ไฮไลต์ลานสนามหลายจุดพร้อมกัน
                     const isActive = targetBin && activeBinIds.includes(targetBin.id);
                     return (
