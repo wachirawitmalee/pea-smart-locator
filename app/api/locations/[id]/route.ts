@@ -49,7 +49,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       for (const rack of racks) {
         for (const floor of rack.floors) {
           const zoneName = `${rack.name} - ชั้น ${floor.level}`;
-          const desiredBins = Array.from({ length: floor.blocks }).map((_, i) => ({
+          const desiredBins = Array.from({ length: floor.blocks }).map((_: any, i: any) => ({
             code: `${name.trim()}-${rack.name.trim()}-F${floor.level}-B${String(i + 1).padStart(2, "0")}`
           }));
           desiredZones.push({ name: zoneName, bins: desiredBins });
@@ -60,31 +60,31 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
       // เปรียบเทียบโซนและจัดการ
       for (const dZone of desiredZones) {
-        let eZone = existingZones.find(z => z.name === dZone.name);
+        let eZone = existingZones.find((z: any) => z.name === dZone.name);
         if (!eZone) {
           // โซนนี้เพิ่งถูกสร้างเพิ่มใหม่
           await prisma.storageZone.create({
-            data: { locationId: id, name: dZone.name, bins: { create: dZone.bins.map(b => ({ code: b.code, status: "EMPTY" })) } }
+            data: { locationId: id, name: dZone.name, bins: { create: dZone.bins.map((b: any) => ({ code: b.code, status: "EMPTY" })) } }
           });
         } else {
           // โซนเดิมมีอยู่แล้ว ให้เช็คจำนวนบล็อกพิกัดภายใน
-          const eBinCodes = eZone.bins.map(b => b.code);
-          const dBinCodes = dZone.bins.map(b => b.code);
+          const eBinCodes = eZone.bins.map((b: any) => b.code);
+          const dBinCodes = dZone.bins.map((b: any) => b.code);
 
           // บล็อกที่ถูกเพิ่มเข้ามาใหม่
-          const binsToAdd = dZone.bins.filter(b => !eBinCodes.includes(b.code));
+          const binsToAdd = dZone.bins.filter((b: any) => !eBinCodes.includes(b.code));
           if (binsToAdd.length > 0) {
-            await prisma.storageBin.createMany({ data: binsToAdd.map(b => ({ code: b.code, status: "EMPTY", zoneId: eZone.id })) });
+            await prisma.storageBin.createMany({ data: binsToAdd.map((b: any) => ({ code: b.code, status: "EMPTY", zoneId: eZone!.id })) });
           }
 
           // บล็อกที่ถูกลดหรือลบทิ้ง
-          const binsToRemove = eZone.bins.filter(b => !dBinCodes.includes(b.code));
+          const binsToRemove = eZone.bins.filter((b: any) => !dBinCodes.includes(b.code));
           if (binsToRemove.length > 0) {
-            const removeIds = binsToRemove.map(b => b.id);
+            const removeIds = binsToRemove.map((b: any) => b.id);
             // ปลดล็อกพัสดุก่อนทำลายบล็อก
             await prisma.material.updateMany({
               where: { bins: { some: { id: { in: removeIds } } } },
-              data: { bins: { disconnect: removeIds.map(rid => ({ id: rid })) } }
+              data: { bins: { disconnect: removeIds.map((rid: any) => ({ id: rid })) } }
             });
             await prisma.storageBin.deleteMany({ where: { id: { in: removeIds } } });
           }
@@ -92,15 +92,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
 
       // ทำลายโซน/แร็คที่ถูกแอดมินลบทิ้งออกไป
-      const dZoneNames = desiredZones.map(z => z.name);
-      const zonesToRemove = existingZones.filter(z => !dZoneNames.includes(z.name));
+      const dZoneNames = desiredZones.map((z: any) => z.name);
+      const zonesToRemove = existingZones.filter((z: any) => !dZoneNames.includes(z.name));
       
       for (const zRem of zonesToRemove) {
-        const removeBinIds = zRem.bins.map(b => b.id);
+        const removeBinIds = zRem.bins.map((b: any) => b.id);
         if (removeBinIds.length > 0) {
           await prisma.material.updateMany({
             where: { bins: { some: { id: { in: removeBinIds } } } },
-            data: { bins: { disconnect: removeBinIds.map(rid => ({ id: rid })) } }
+            data: { bins: { disconnect: removeBinIds.map((rid: any) => ({ id: rid })) } }
           });
           await prisma.storageBin.deleteMany({ where: { zoneId: zRem.id } });
         }
@@ -121,19 +121,19 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       let mainZone = await prisma.storageZone.findFirst({ where: { locationId: id, name: "ลานกว้าง" }, include: { bins: true } });
       if (!mainZone) mainZone = await prisma.storageZone.create({ data: { locationId: id, name: "ลานกว้าง" }, include: { bins: true } });
 
-      const eBinCodes = mainZone.bins.map(b => b.code);
-      const binsToAdd = desiredBinCodes.filter(c => !eBinCodes.includes(c));
-      const binsToRemove = mainZone.bins.filter(b => !desiredBinCodes.includes(b.code));
+      const eBinCodes = mainZone.bins.map((b: any) => b.code);
+      const binsToAdd = desiredBinCodes.filter((c: any) => !eBinCodes.includes(c));
+      const binsToRemove = mainZone.bins.filter((b: any) => !desiredBinCodes.includes(b.code));
 
       if (binsToAdd.length > 0) {
-        await prisma.storageBin.createMany({ data: binsToAdd.map(code => ({ code, status: "EMPTY", zoneId: mainZone.id })) });
+        await prisma.storageBin.createMany({ data: binsToAdd.map((code: any) => ({ code, status: "EMPTY", zoneId: mainZone!.id })) });
       }
 
       if (binsToRemove.length > 0) {
-        const removeIds = binsToRemove.map(b => b.id);
+        const removeIds = binsToRemove.map((b: any) => b.id);
         await prisma.material.updateMany({
           where: { bins: { some: { id: { in: removeIds } } } },
-          data: { bins: { disconnect: removeIds.map(rid => ({ id: rid })) } }
+          data: { bins: { disconnect: removeIds.map((rid: any) => ({ id: rid })) } }
         });
         await prisma.storageBin.deleteMany({ where: { id: { in: removeIds } } });
       }
