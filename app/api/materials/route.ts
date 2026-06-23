@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { promises as fs } from "fs";
-import path from "path";
 
 const prisma = new PrismaClient();
 
@@ -32,27 +30,37 @@ export async function POST(req: Request) {
       const imageFile = formData.get("image") as File | null;
 
       if (imageFile && imageFile.size > 0) {
+        // 💡 แปลงไฟล์เป็น Base64 แล้วส่งให้เซิร์ฟเวอร์ ImgBB ประมวลผล
         const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
+        const base64String = buffer.toString('base64');
         
-        // ตรวจสอบและสร้างโฟลเดอร์ uploads อัตโนมัติถ้ายังไม่มี
-        try {
-          await fs.access(uploadDir);
-        } catch {
-          await fs.mkdir(uploadDir, { recursive: true });
+        const imgbbApiKey = process.env.IMGBB_API_KEY;
+        if (!imgbbApiKey) {
+          return NextResponse.json({ error: "ยังไม่ได้ตั้งค่า IMGBB_API_KEY ในระบบ" }, { status: 500 });
         }
-        
-        const fileExtension = path.extname(imageFile.name) || ".png";
-        const filename = `${materialCode.trim()}_${Date.now()}${fileExtension}`;
-        const filePath = path.join(uploadDir, filename);
-        
-        await fs.writeFile(filePath, buffer);
-        imageUrl = `/uploads/${filename}`;
+
+        const imgbbFormData = new FormData();
+        imgbbFormData.append("key", imgbbApiKey);
+        imgbbFormData.append("image", base64String);
+
+        const uploadRes = await fetch("https://api.imgbb.com/1/upload", {
+          method: "POST",
+          body: imgbbFormData,
+        });
+
+        const uploadData = await uploadRes.json();
+
+        if (uploadData.success) {
+          // ดึง URL รูปภาพจาก ImgBB มาใช้
+          imageUrl = uploadData.data.url;
+        } else {
+          console.error("ImgBB Upload Error:", uploadData);
+          return NextResponse.json({ error: "อัปโหลดรูปภาพไปที่ ImgBB ไม่สำเร็จ" }, { status: 500 });
+        }
       }
     } 
     // 📄 กรณีฉุกเฉิน (เผื่อส่งเป็น JSON มา)
     else {
-      // 💡 กำกับ Type : any ให้ body ป้องกัน TypeScript แจ้งเตือน
       const body: any = await req.json();
       materialCode = body.materialCode || "";
       description = body.description || "";
@@ -88,7 +96,7 @@ export async function POST(req: Request) {
       binId = targetBin.id;
     }
 
-    // 💡 เตรียมข้อมูลก่อนบันทึก (แก้ไขให้รองรับโครงสร้างแบบ Many-to-Many ของ Prisma)
+    // เตรียมข้อมูลก่อนบันทึก
     const createData: any = {
       materialCode: materialCode.trim(),
       description: description.trim(),
@@ -99,7 +107,7 @@ export async function POST(req: Request) {
       imageUrl: imageUrl,
     };
 
-    // 💡 ถ้ามีการระบุพิกัด ให้เชื่อมโยงพิกัดแบบ connect (ป้องกัน Prisma Error)
+    // เชื่อมโยงพิกัด
     if (binId) {
       createData.bins = {
         connect: [{ id: binId }]

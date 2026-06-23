@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { promises as fs } from "fs";
-import path from "path";
 
 const prisma = new PrismaClient();
 
@@ -31,19 +29,38 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       updateData.placeOfWork = formData.get("placeOfWork")?.toString() || "";
       updateData.remark = formData.get("remark")?.toString() || "";
       
-      // ✅ ดึงพิกัดทั้งหมดที่ส่งมาเป็น Array (แก้ไขระบุ Type ตรงนี้เผื่อไว้ด้วยครับ)
+      // ดึงพิกัดทั้งหมดที่ส่งมาเป็น Array
       locationCodes = formData.getAll("locationCodes").map((s: any) => s.toString()).filter(Boolean);
 
       const imageFile = formData.get("image") as File | null;
       if (imageFile && imageFile.size > 0) {
+        // 💡 แปลงไฟล์รูปภาพส่งไปฝากไว้ที่ ImgBB 
         const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-        try { await fs.access(uploadDir); } catch { await fs.mkdir(uploadDir, { recursive: true }); }
-        const fileExtension = path.extname(imageFile.name) || ".png";
-        const filename = `edit_${id}_${Date.now()}${fileExtension}`;
-        const filePath = path.join(uploadDir, filename);
-        await fs.writeFile(filePath, buffer);
-        updateData.imageUrl = `/uploads/${filename}`;
+        const base64String = buffer.toString('base64');
+        
+        const imgbbApiKey = process.env.IMGBB_API_KEY;
+        if (!imgbbApiKey) {
+          return NextResponse.json({ error: "ยังไม่ได้ตั้งค่า IMGBB_API_KEY ในระบบ" }, { status: 500 });
+        }
+
+        const imgbbFormData = new FormData();
+        imgbbFormData.append("key", imgbbApiKey);
+        imgbbFormData.append("image", base64String);
+
+        const uploadRes = await fetch("https://api.imgbb.com/1/upload", {
+          method: "POST",
+          body: imgbbFormData,
+        });
+
+        const uploadData = await uploadRes.json();
+
+        if (uploadData.success) {
+          // ดึง URL ที่ ImgBB ตอบกลับมา
+          updateData.imageUrl = uploadData.data.url;
+        } else {
+          console.error("ImgBB Upload Error:", uploadData);
+          return NextResponse.json({ error: "อัปโหลดรูปภาพไปที่ ImgBB ไม่สำเร็จ" }, { status: 500 });
+        }
       }
     } else {
       const body = await req.json();
@@ -55,7 +72,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       locationCodes = body.locationCodes || [];
     }
 
-    // ✅ อัปเดตพิกัดแบบ Many-to-Many
+    // อัปเดตพิกัดแบบ Many-to-Many
     const targetBins = await prisma.storageBin.findMany({
       where: { code: { in: locationCodes } }
     });
@@ -64,7 +81,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       where: { id },
       data: {
         ...updateData,
-        // ✅ แก้ไข Type Error ตรงนี้เรียบร้อยแล้วครับ
         bins: { set: targetBins.map((b: any) => ({ id: b.id })) } 
       }
     });
