@@ -227,11 +227,20 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ตาราง */}
+      {/* ✅ ตารางข้อมูลพัสดุ (พร้อมแถบเลื่อนแนวตั้งและล็อกหัวตาราง) */}
       <div className="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* เพิ่ม overflow-y-auto กำหนด max-h เพื่อให้มีแถบเลื่อนเมื่อเกิน ~20 รายการ */}
+        <div className="overflow-x-auto overflow-y-auto max-h-[600px] relative scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
           <table className="w-full text-left whitespace-nowrap min-w-[850px]">
-            <thead><tr className="bg-slate-50 text-slate-600 text-xs font-black border-b border-slate-200 uppercase tracking-widest"><th className="p-4 pl-6 w-36">รหัสพัสดุ</th><th className="p-4">รายละเอียด</th><th className="p-4 w-60 text-[#741F80]">รหัสพิกัดจัดเก็บ</th><th className="p-4 w-36 text-center">จัดการ</th></tr></thead>
+            {/* เพิ่ม sticky top-0 ไว้ล็อกหัวตาราง, z-10 และกำหนด bg เพื่อไม่ให้โปร่งใส */}
+            <thead className="sticky top-0 z-10 shadow-sm border-b border-slate-200">
+              <tr className="bg-slate-50 text-slate-600 text-xs font-black uppercase tracking-widest">
+                <th className="p-4 pl-6 w-36 bg-slate-50">รหัสพัสดุ</th>
+                <th className="p-4 bg-slate-50">รายละเอียด</th>
+                <th className="p-4 w-60 text-[#741F80] bg-slate-50">รหัสพิกัดจัดเก็บ</th>
+                <th className="p-4 w-36 text-center bg-slate-50">จัดการ</th>
+              </tr>
+            </thead>
             <tbody>
               {isLoading ? (<tr><td colSpan={4} className="p-16 text-center text-slate-400"><Loader2 className="animate-spin mx-auto mb-3" size={36} /><p>กำลังโหลด...</p></td></tr>) : 
                filteredMaterials.length === 0 ? (<tr><td colSpan={4} className="p-16 text-center font-bold text-slate-400">ไม่พบพัสดุตามเงื่อนไขที่เลือก</td></tr>) : 
