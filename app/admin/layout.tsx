@@ -53,10 +53,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  const isActive = (path: string) => {
-    return pathname === path ? "bg-[#741F80] text-white shadow-md" : "text-slate-600 hover:bg-slate-200/50";
-  };
-
   // ⌛ รอเมาท์ฝั่ง Client ให้เสร็จ ป้องกันหน้าจอกะพริบ
   if (!isMounted) {
     return <div className="min-h-screen bg-slate-50"></div>;
@@ -86,7 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
-                placeholder="ชื่อผู้ใช้งาน (admin)"
+                placeholder="ชื่อผู้ใช้งาน"
                 value={inputUsername}
                 onChange={(e) => setInputUsername(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3.5 outline-none focus:border-[#741F80] font-bold text-slate-700"
@@ -97,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="password" 
-                placeholder="รหัสผ่าน (1234)"
+                placeholder="รหัสผ่าน"
                 value={inputPassword}
                 onChange={(e) => setInputPassword(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3.5 outline-none focus:border-[#741F80] font-bold text-slate-700"
@@ -147,19 +143,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* แถบเมนูด้านซ้าย */}
           <div className="w-full md:w-72 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-6 flex flex-col gap-2 flex-shrink-0">
             <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 px-4">เมนูจัดการระบบ</h2>
-            <Link href="/admin" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive("/admin")}`}>
+            
+            <Link href="/admin" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${pathname === "/admin" ? "bg-[#741F80] text-white shadow-md" : "text-slate-600 hover:bg-slate-200/50"}`}>
               <PackageSearch size={20} /> รายการพัสดุทั้งหมด
             </Link>
-            <Link href="/admin/add" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive("/admin/add")}`}>
+            <Link href="/admin/add" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${pathname === "/admin/add" ? "bg-[#741F80] text-white shadow-md" : "text-slate-600 hover:bg-slate-200/50"}`}>
               <PackagePlus size={20} /> เพิ่มพัสดุ (เดี่ยว)
             </Link>
-            <Link href="/admin/excel" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive("/admin/excel")}`}>
+            <Link href="/admin/excel" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${pathname === "/admin/excel" ? "bg-[#741F80] text-white shadow-md" : "text-slate-600 hover:bg-slate-200/50"}`}>
               <FileSpreadsheet size={20} /> นำเข้าข้อมูล (Excel)
             </Link>
             
             <div className="mt-4 mb-2"><h2 className="text-xs font-black text-slate-400 uppercase tracking-widest px-4">ระบบสถานที่</h2></div>
             
-            <Link href="/admin/locations-list" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive("/admin/locations-list") || pathname.includes("/admin/locations/") ? "bg-[#741F80] text-white shadow-md" : "text-slate-600 hover:bg-slate-200/50"}`}>
+            <Link href="/admin/locations-list" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${pathname === "/admin/locations-list" || pathname.startsWith("/admin/locations/") ? "bg-[#741F80] text-white shadow-md" : "text-slate-600 hover:bg-slate-200/50"}`}>
               <MapPin size={20} /> ดูและแก้ไขผังคลัง
             </Link>
             <Link href="/admin/locations" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${pathname === "/admin/locations" ? "bg-[#741F80] text-white shadow-md" : "text-slate-600 hover:bg-slate-200/50"}`}>
